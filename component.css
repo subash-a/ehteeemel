@@ -1,0 +1,17 @@
+/* Inplace Edit Styles */
+
+.editable input {
+    display: none;
+}
+
+.editable a {
+    display: inline;
+}
+
+.editable.editing input {
+    display: inline;
+}
+
+.editable.editing a {
+    display: none;
+}

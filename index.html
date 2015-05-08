@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <title> Simple HTML Components </title>
+    <link rel="stylesheet" href="component.css" />
+  </head>
+  <body>
+    <h1> Simple HTML Component Built with Nothing but pure javascript </h1>
+    <h3> In Place Input Editor </h3>
+    <article>
+      <section>
+	<p>
+	  This is a plain HTML in place editor which can be used anywhere
+	  without any library dependency and also has custom event emitting
+	  you can add an event listener to the <b>editing</b> event and you will
+	  be able to perform any action you want on the DOM when the event fires
+	  </p>
+      </section>
+    </article>
+    <div id="editor"></div>
+    <script src="component.js"></script>
+    <script>
+      document.querySelector('#editor').appendChild(inplaceEdit({'label':'Hello World'}));
+    </script>
+  </body>
+</html>
