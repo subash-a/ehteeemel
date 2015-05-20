@@ -360,3 +360,232 @@ var inplaceEdit = function(attributes) {
     });
     return container;
 };
+
+/**
+ * This method creates a single action link for the action bar and sets
+ * its label and attributes
+ * @method createActionLink
+ * @param {String} label is the display name of the link
+ * @param {Object} attributes is the list of attributes to set on
+ * the DOM Node element
+ * @return {DOMNode} returns a DOM Node element with attributes set
+ */
+var createActionLink = function(label, attributes) {
+    var a = document.createElement(_A_);
+    a.innerText = label;
+    if (attributes && typeof attributes === _OBJECT_DATA_TYPE_) {
+        Object.keys(attributes).forEach(function(attrib) {
+            a.setAttribute(attrib, attributes[attrib]);
+        });
+    }
+    return a;
+};
+
+/**
+ * This method creates a horizontal bar which holds the list of actions
+ * @method createActionBar
+ * @param {Array} data is an array of string elements or objects
+ * If they are objects they need to have the following key
+ * label - The name of the action to be displayed
+ * all the remaining keys will be considered as attributes and passed on
+ * to create the action link
+ * @returns {DOMNode} returns a DOM Node element which can be embedded
+ */
+var createActionBar = function(data) {
+    var _ACTION_BAR_CLASSNAME_ = 'action-bar';
+    var attributes = {};
+    attributes[_HREF_ATTRIBUTE_] = '#';
+    var nav = document.createElement(_NAV_);
+    var ul = document.createElement(_UL_);
+    ul.setAttribute(_CLASS_ATTRIBUTE_, _ACTION_BAR_CLASSNAME_);
+    if (data && typeof data === _OBJECT_DATA_TYPE_) {
+        data.forEach(function(action) {
+            var a;
+            var li = document.createElement(_LI_);
+            if (action && typeof action === _OBJECT_DATA_TYPE_) {
+                a = createActionLink(action.label, action);
+            } else {
+                a = createActionLink(action, attributes);
+            }
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+    }
+    nav.appendChild(ul);
+    return nav;
+};
+
+
+var createTree = function(data) {
+    var _COLLAPSE_CLASS_ = 'collapse';
+    var _TREE_CLASS_ = 'tree';
+    var _TREE_NODE_CLASS_ = 'tree-node';
+    var _VALUE_CLASS_ = 'value';
+    var _KEY_SUFFIX_ = ': ';
+
+    var toggleExpand = function(event) {
+        if (event.target.nodeName === _A_.toUpperCase()) {
+            var node = event.target.nextElementSibling;
+            var target = event.target;
+            if (node.classList.contains(_COLLAPSE_CLASS_)) {
+                node.classList.remove(_COLLAPSE_CLASS_);
+            } else {
+                node.classList.add(_COLLAPSE_CLASS_);
+            }
+        }
+        event.preventDefault();
+    };
+
+    var traverseTree = function(tree) {
+        var root = document.createElement(_UL_);
+        root.setAttribute(_CLASS_ATTRIBUTE_, _TREE_CLASS_);
+        if (tree && typeof tree === _OBJECT_DATA_TYPE_) {
+            if (typeof tree.map === _FUNCTION_DATA_TYPE_) {
+                //TODO Handle Array Data structure
+                tree.map(function(item, index) {
+                    var valueElement;
+                    var listItem = document.createElement(_LI_);
+                    listItem.setAttribute(_CLASS_ATTRIBUTE_, _TREE_NODE_CLASS_);
+                    if (item && typeof item === _OBJECT_DATA_TYPE_) {
+                        valueElement = document.createElement(_A_);
+                        valueElement.setAttribute(_HREF_ATTRIBUTE_, '#');
+                        valueElement.innerText = index + _KEY_SUFFIX_;
+                        listItem.appendChild(valueElement);
+                        listItem.appendChild(traverseTree(item));
+                    } else {
+                        valueElement = document.createElement(_SPAN_);
+                        valueElement.setAttribute(_CLASS_ATTRIBUTE_, _VALUE_CLASS_);
+                        valueElement.innerText = item;
+                        listItem.appendChild(valueElement);
+                    }
+                    root.appendChild(listItem);
+                });
+            } else {
+                // TODO Handle Map Data Structure
+                Object.keys(tree).forEach(function(item) {
+                    var keyItem, valueItem;
+                    var listItem = document.createElement(_LI_);
+                    listItem.setAttribute(_CLASS_ATTRIBUTE_, _TREE_NODE_CLASS_);
+                    if (tree[item] && typeof tree[item] === _OBJECT_DATA_TYPE_) {
+                        keyItem = document.createElement(_A_);
+                        keyItem.setAttribute(_HREF_ATTRIBUTE_, '#');
+                        keyItem.innerText = item + _KEY_SUFFIX_;
+                        listItem.appendChild(keyItem);
+                        listItem.appendChild(traverseTree(tree[item]));
+                    } else {
+                        keyItem = document.createElement(_SPAN_);
+                        valueItem = document.createElement(_SPAN_);
+                        valueItem.setAttribute(_CLASS_ATTRIBUTE_, _VALUE_CLASS_);
+                        keyItem.innerText = item + _KEY_SUFFIX_;
+                        valueItem.innerText = tree[item];
+                        listItem.appendChild(keyItem);
+                        listItem.appendChild(valueItem);
+                    }
+                    root.appendChild(listItem);
+                });
+            }
+        }
+        return root;
+    };
+    var treeView = traverseTree(data);
+    treeView.addEventListener(_CLICK_EVENT_TYPE_, toggleExpand);
+    return treeView;
+};
+
+var createMap = function(data, rootElementType, childElementType, keyElementType, valueElementType, keySuffixString) {
+    var _KEY_CLASS_NAME_ = 'key';
+    var _VALUE_CLASS_NAME_ = 'value';
+    var rootNode = rootElementType || _UL_;
+    var childNode = childElementType || _LI_;
+    var keyNode = keyElementType || _SPAN_;
+    var valueNode = valueElementType || _SPAN_;
+    var keySuffix = keySuffixString || ': ';
+    var root = document.createElement(rootNode);
+    if (typeof data === _OBJECT_DATA_TYPE_) {
+        if (typeof data.length === _NUMBER_DATA_TYPE_) {
+            data.forEach(function(item) {
+                var childKey = document.createElement(childNode);
+                childKey.setAttribute(_CLASS_ATTRIBUTE_, _KEY_CLASS_NAME_);
+                var childValue = document.createElement(valueNode);
+                childValue.setAttribute(_CLASS_ATTRIBUTE_, _VALUE_CLASS_NAME_);
+                childValue.innerText = item;
+                childKey.appendChild(childValue);
+                root.appendChild(childKey);
+            });
+        } else {
+            Object.keys(data).forEach(function(item) {
+                var childContainer = document.createElement(childNode);
+                var keyElement = document.createElement(keyNode);
+                keyElement.setAttribute(_CLASS_ATTRIBUTE_, _KEY_CLASS_NAME_);
+                var valueElement = document.createElement(valueNode);
+                valueElement.setAttribute(_CLASS_ATTRIBUTE_, _VALUE_CLASS_NAME_);
+                keyElement.innerText = item + keySuffix;
+                valueElement.innerText = data[item];
+                childContainer.appendChild(keyElement);
+                childContainer.appendChild(valueElement);
+                root.appendChild(childContainer);
+            });
+        }
+    } else {
+        var li = document.createElement(childNode);
+        li.innerText = data;
+        root.appendChild(li);
+    }
+    return root;
+};
+
+var createLinksList = function(data, rootElementType, childElementType, keyElementType, valueElementType, assetId) {
+    var rootNode = rootElementType || _LI_;
+    var childNode = childElementType || _LI_;
+    var keyNode = keyElementType || _SPAN_;
+    var valueNode = valueElementType || _SPAN_;
+    var root = document.createElement(rootNode);
+    if (typeof data === _OBJECT_DATA_TYPE_) {
+        if (typeof data.length === _NUMBER_DATA_TYPE_) {
+            data.forEach(function(item) {
+                var li = document.createElement(childNode);
+                var span = document.createElement(valueNode);
+                span.setAttribute('data-id', assetId);
+                span.setAttribute(_HREF_ATTRIBUTE_, '#');
+                span.innerText = item;
+                li.appendChild(span);
+                root.appendChild(li);
+            });
+        } else {
+            Object.keys(data).forEach(function(item) {
+                var li = document.createElement(childNode);
+                var keySpan = document.createElement(keyNode);
+                var valueSpan = document.createElement(valueNode);
+                keySpan.innerText = item;
+                valueSpan.innerText = data[item];
+                valueSpan.setAttribute('data-id', assetId);
+                valueSpan.setAttribute(_HREF_ATTRIBUTE_, '#');
+                li.appendChild(keySpan);
+                li.appendChild(valueSpan);
+                root.appendChild(li);
+            });
+        }
+    } else {
+        var li = document.createElement(childNode);
+        li.innerText = data;
+        root.appendChild(li);
+    }
+    return root;
+};
+
+var createLink = function(text, eventHandler, data) {
+    var a = document.createElement(_A_);
+    a.innerText = text;
+    a.setAttribute(_HREF_ATTRIBUTE_, '#');
+    if (data && typeof data === _OBJECT_DATA_TYPE_) {
+        Object.keys(data).forEach(function(key) {
+            a.setAttribute(_DATA_PREFIX_ + key, data[key]);
+        });
+    }
+    a.addEventListener(_CLICK_EVENT_TYPE_, eventHandler);
+    return a;
+};
+
+
+
+
